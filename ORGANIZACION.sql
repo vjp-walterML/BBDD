@@ -141,5 +141,32 @@ INSERT INTO EMPLEADOS VALUES
 (4,'LOPEZ','OPERADOR','CALLE CUATRO','2007/1/12','1700.5','3.5',40),
 (5,'IGLESIAS','ADMINISTRATIVO','CALLE CINCO','2018/1/1','1500.25','2.5',10);
 
--- -----------------------------------------------------------------------------
+-- ----------------------------------------EJEMPLOS -------------------------------------
+-- EJEMPLO ASOCIACION DE TABLAS
+SELECT EMPLEADOS.*,NOMBRE,LOCALIDAD
+FROM EMPLEADOS,DEPARTAMENTO
+WHERE EMPLEADOS.NUM_DPTO = DEPARTAMENTO.NUM_DPTO;
+
+-- EJEMPLO INNER JOIN
+SELECT EMPLEADOS.*,NOMBRE,LOCALIDAD
+FROM EMPLEADOS INNER JOIN DEPARTAMENTO
+ON EMPLEADOS.NUM_DPTO = DEPARTAMENTO.NUM_DPTO
+WHERE DEPARTAMENTO.LOCALIDAD = 'SEVILLA';
+-- ---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
