@@ -322,8 +322,10 @@ SELECT FABRICANTES.CODIGO,FABRICANTES.NOMBRE, PRODUCTOS.NOMBRE
 FROM FABRICANTES  INNER JOIN PRODUCTOS 
 ON FABRICANTES.CODIGO = PRODUCTOS.CODIGO_FABRICANTE;
 
--- ================================================================================
--- 1
+-- ==================================CONSULTAS MULTITABLA (COMPOSICION EXTERNA)==============================================
+-- 1  Devuelve un listado de todos los fabricantes que existen en la base de datos, junto con los
+-- PRODUCTOS que tiene cada uno de ellos. El listado deberá mostrar también aquellos
+-- fabricantes que no tienen PRODUCTOS asociados
 SELECT FABRICANTES.CODIGO,FABRICANTES.NOMBRE, PRODUCTOS.NOMBRE
 FROM FABRICANTES  LEFT JOIN PRODUCTOS 
 ON  FABRICANTES.CODIGO = PRODUCTOS.CODIGO_FABRICANTE;
