@@ -330,3 +330,90 @@ SELECT FABRICANTES.CODIGO,FABRICANTES.NOMBRE, PRODUCTOS.NOMBRE
 FROM FABRICANTES  LEFT JOIN PRODUCTOS 
 ON  FABRICANTES.CODIGO = PRODUCTOS.CODIGO_FABRICANTE;
 
+-- 2 Devuelve un listado donde sólo aparezcan aquellos fabricantes que no tienen ningún PRODUCTO asociado.
+SELECT FABRICANTES.CODIGO,FABRICANTES.NOMBRE AS FABRICANTE, PRODUCTOS.NOMBRE AS PRODUCTO
+FROM FABRICANTES  LEFT JOIN PRODUCTOS 
+ON  FABRICANTES.CODIGO = PRODUCTOS.CODIGO_FABRICANTE
+WHERE PRODUCTOS.NOMBRE IS NULL;
+
+
+-- ==================================CONSULTAS RESUMEN A VARIAS TABLAS=============================================
+-- 1 Calcula el número de PRODUCTOS que tiene el fabricante Asus.
+SELECT COUNT(P.NOMBRE) AS ASUS
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Asus";
+
+-- 2 Calcula la media del precio de todos los PRODUCTOS del fabricante Asus.
+SELECT avg(P.PRECIO) AS MEDIA
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Asus";
+
+-- 3. Calcula el precio más barato de todos los PRODUCTOS del fabricante Asus.
+SELECT min(P.PRECIO) AS BARATO
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Asus";
+
+-- 4. Calcula el precio más caro de todos los PRODUCTOS del fabricante Asus.
+SELECT max(P.PRECIO) AS CARO
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Asus";
+
+-- 5. Calcula la suma de todos los PRODUCTOS del fabricante Asus.
+SELECT sum(P.PRECIO) AS SUMA
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Asus";
+
+-- 6. Muestra el precio máximo, precio mínimo, precio medio y el número total de PRODUCTOS que tiene el fabricante Crucial.
+SELECT max(P.PRECIO) AS MAXIMO,min(P.PRECIO) AS MINIMO,avg(P.PRECIO) AS MEDIA,count(P.NOMBRE) AS NUM_PRODUCTOS
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+WHERE F.NOMBRE = "Crucial";
+
+-- 7. Muestra el número total de PRODUCTOS que tiene cada uno de los fabricantes. El listado
+-- también debe incluir los fabricantes que no tienen ningún PRODUCTOS. El resultado
+-- mostrará dos columnas, una con el nombre del fabricante y otra con el número de
+-- PRODUCTOS que tiene. Ordene el resultado descendentemente por el número de PRODUCTOS
+SELECT F.NOMBRE AS FABRICANTE,COUNT(P.NOMBRE) AS NUMERO_PRODUCTOS
+FROM FABRICANTES AS F LEFT JOIN PRODUCTOS AS P
+ON F.CODIGO = P.CODIGO_FABRICANTE
+GROUP BY F.NOMBRE
+ORDER BY NUMERO_PRODUCTOS DESC;
+
+-- 8. Muestra el precio máximo, precio mínimo y precio medio de los PRODUCTOS de cada uno
+-- de los fabricantes. El resultado mostrará el nombre del fabricante junto con los datos que
+-- se solicitan.
+SELECT F.NOMBRE AS FABRICANTE, max(P.PRECIO) AS MAXIMO,min(P.PRECIO) AS MINIMO,avg(P.PRECIO) AS MEDIA
+FROM FABRICANTES AS F INNER JOIN PRODUCTOS AS P
+ON  F.CODIGO = P.CODIGO_FABRICANTE
+GROUP BY F.NOMBRE;
+
+-- 9. Muestra el precio máximo, precio mínimo, precio medio y el número total de PRODUCTOS
+-- de los fabricantes que tienen un precio medio superior a 200€. No es necesario mostrar el
+-- nombre del fabricante, con el código del fabricante es suficiente.
+SELECT P.CODIGO_FABRICANTE AS FABRICANTE,max(P.PRECIO) AS MAXIMO,min(P.PRECIO) AS MINIMO,avg(P.PRECIO) AS MEDIA,count(P.NOMBRE) AS NUM_PRODUCTOS
+FROM PRODUCTOS AS P
+WHERE avg(P.PRECIO)>200
+GROUP BY CODIGO_FABRICANTE;
+
+
+-- 10. Muestra el nombre de cada fabricante, junto con el precio máximo, precio mínimo, precio
+-- medio y el número total de PRODUCTOS de los fabricantes que tienen un precio medio
+-- superior a 200€. Es necesario mostrar el nombre del fabricante.
+
+-- 11. Calcula el número de PRODUCTOS que tienen un precio mayor o igual a 180€.
+-- 12. Calcula el número de PRODUCTOS que tiene cada fabricante con un precio mayor o igual a 180€.
+-- 13. Lista el precio medio los PRODUCTOS de cada fabricante, mostrando solamente el código del fabricante.
+-- 14. Lista el precio medio los PRODUCTOS de cada fabricante, mostrando solamente el nombre del fabricante.
+-- 15. Lista los nombres de los fabricantes cuyos PRODUCTOS tienen un precio medio mayor o igual a 150€.
+-- 16. Devuelve un listado con los nombres de los fabricantes que tienen 2 o más PRODUCTOS.
+
+-- 17. Devuelve un listado con los nombres de los fabricantes y el número de PRODUCTOS que
+-- tiene cada uno con un precio superior o igual a 220 €. No es necesario mostrar el nombre
+-- de los fabricantes que no tienen PRODUCTOS que cumplan la condición.
+
+-- 18. Devuelve un listado con los nombres de los fabricantes donde la suma del precio de todos sus PRODUCTOS es superior a 1000 €.
