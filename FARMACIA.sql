@@ -240,3 +240,154 @@ AND LABORATORIO ='AZQUE';
 -- que recibe como parámetro una cadena en minúscula y la convierte a mayúsculas?
 SELECT * FROM EMPLEADOS
 WHERE lower(APE1)='perez';
+
+-- ========================4-CONSULTAS II==============================
+-- 21. Crea una consulta que muestre ID_venta y fecha de ventas de las ventas realizadas en 3 fechas
+-- concretas (busca en tu tabla ventas fechas válidas)
+SELECT ID_VENTAS, FECHA_VENTAS
+FROM VENTAS
+WHERE FECHA_VENTAS IN ( '2010/1/30','2010/2/12','2013/3/12');
+-- 22. Crea una consulta que muestre el id_venta y la fecha de ventas de los registros donde
+-- Id_cliente=1 y Id_medicamento=5.
+SELECT ID_VENTAS, FECHA_VENTAS
+FROM VENTAS
+WHERE ID_CLIENTE=1
+AND ID_MEDICAMENTO =5;
+-- 23. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=2 o
+-- ID_cliente=3
+SELECT * FROM VENTAS
+WHERE ID_CLIENTE IN(2,3);
+-- 24. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_empleado=2
+-- y ID_medicamento=3
+SELECT * FROM VENTAS
+WHERE ID_CLIENTE = 2
+AND ID_MEDICAMENTO =3;
+-- 25. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=2 o
+-- ID_cliente=3 y Id_empleado=1
+SELECT * FROM VENTAS
+WHERE ID_CLIENTE IN(2,3)
+ AND ID_EMPLEADO=1;
+-- 26. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=2 o
+-- ID_cliente=3
+SELECT * FROM VENTAS
+WHERE ID_CLIENTE IN(2,3);
+-- 27. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=5 y
+-- ID_empleado=3 y id_medicamento=1 o id_medicamento=5
+SELECT * FROM VENTAS 
+WHERE (ID_CLIENTE=5 AND ID_EMPLEADO=3)
+AND (ID_MEDICAMENTO IN(1,5));
+-- 28. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=2 o
+-- ID_cliente=3 y fecha_venta= (busca una fecha válida en tu tabla).
+SELECT * FROM VENTAS 
+WHERE ID_CLIENTE IN(2,3)
+AND FECHA_VENTAS='2010/1/30';
+-- 29. Crea una consulta que muestre todos los campos de la tabla ventas que cumplan Id_cliente=4,
+-- id_empleado=1, id_medicamento=3 y fecha_venta= (fecha válida en tu tabla).
+SELECT * FROM VENTAS 
+WHERE ID_CLIENTE=4
+AND ID_EMPLEADO=1
+AND ID_MEDICAMENTO=3
+AND  FECHA_VENTAS='2010/1/30';
+-- 30. Crea una consulta que muestre el ID_cliente, nombre y dirección de los clientes cuyo nombre termina por A.
+SELECT ID_CLIENTE,NOMBRE,DIRECCION 
+FROM CLIENTES
+WHERE NOMBRE LIKE '%A';
+-- 31. Crea una consulta que muestre el ID_cliente, dirección y teléfono de los clientes cuyo teléfono
+-- tiene prefijo de la provincia de Cáceres (927).
+SELECT ID_CLIENTE,DIRECCION,TELEFONO
+FROM CLIENTES
+WHERE TELEFONO LIKE '927%';
+-- 32. Crea una consulta que muestre el ID_cliente y la dirección de los clientes cuyo primer apellido empieza por S.
+SELECT ID_CLIENTE,DIRECCION
+FROM CLIENTES
+WHERE APE1 LIKE 'S%';
+-- 33. Crea una consulta que muestre el ID_medicamento, principio activo y laboratorio de los
+-- medicamentos fabricados por un laboratorio que empieza por B.
+SELECT ID_MEDICAMENTO,PRINCIPIO,LABORATORIO
+FROM MEDICAMENTOS
+WHERE LABORATORIO LIKE 'B%';
+-- 34. Crea una consulta que muestre el ID_medicamento, nombre comercial y precio de los
+-- medicamentos cuyo nombre termina en OL.
+SELECT ID_MEDICAMENTO,NOMCOMERCIAL,PRECIO
+FROM MEDICAMENTOS
+WHERE NOMCOMERCIAL LIKE '%OL';
+-- 35. Crea una consulta que muestre el nombre comercial, principio activo y laboratorio de los
+-- medicamentos fabricados por un laboratorio que empieza por B y cuyo precio es menor de 5€.
+SELECT NOMCOMERCIAL,PRINCIPIO,LABORATORIO
+FROM MEDICAMENTOS
+WHERE LABORATORIO LIKE 'B%' 
+AND PRECIO<5;
+-- 36. Crea una consulta que muestre el ID_medicamento y principio activo de los medicamentos
+-- fabricados por un laboratorio que empieza por E y cuyo principio activo contiene una X.
+SELECT ID_MEDICAMENTO,PRINCIPIO
+FROM MEDICAMENTOS
+WHERE LABORATORIO LIKE 'E%' 
+AND PRINCIPIO LIKE '%X%';
+
+-- ========================5-CONSULTAS III==============================
+
+-- 37. Crear una consulta que obtenga el número total de clientes.
+SELECT COUNT(ID_CLIENTE) AS NUMERO_DE_CLIENTES
+FROM CLIENTES;
+-- 38. Crear una consulta que obtenga el número de medicamentos por cada laboratorio.
+SELECT LABORATORIO,COUNT(ID_MEDICAMENTO) AS MEDICAMENTOS
+FROM MEDICAMENTOS
+GROUP BY LABORATORIO;
+-- 39. Crear una consulta que cuente el número de ventas realizadas en el año 2010.
+SELECT COUNT(ID_VENTAS) AS VENTAS_2010
+FROM VENTAS
+WHERE YEAR(FECHA_VENTAS) = '2010';
+-- 40. Crear una consulta que cuente el número de clientes que han comprado el medicamento 1
+SELECT COUNT(ID_CLIENTE) AS NUM_CLIENTES_MEDICAMENTO1
+FROM VENTAS
+WHERE ID_MEDICAMENTO = 1;
+
+-- ========================CONSULTAS FINALES IV==============================
+-- 1.Crea una consulta que muestre el Nombre del cliente y su dirección para todos los que realizaron una compra el día 2009-01-04.
+SELECT C.NOMBRE,C.DIRECCION,V.FECHA_VENTAS
+FROM CLIENTES AS C INNER JOIN VENTAS AS V
+ON C.ID_CLIENTE=V.ID_CLIENTE
+WHERE V.FECHA_VENTAS='2009-01-04';
+
+-- -- 2. Crea una consulta que muestre el nombre, ape1, ape2 y sueldo de los empleados que atendieron ventas el mes de Enero.
+SELECT E.NOMBRE,E.APE1,E.APE2,E.SUELDO,V.FECHA_VENTAS
+FROM EMPLEADOS AS E INNER JOIN VENTAS AS V
+ON E.ID_EMPLEADO = V.ID_EMPLEADO
+WHERE month(V.FECHA_VENTAS)='01';
+
+-- 3 Crea una consulta que muestre el nombre comercial, principio activo y laboratorio de los medicamentos fabricados por el laboratorio EUROPHARM y de precio SUPERIOR a 5 € vendidos en el mes de marzo
+SELECT M.NOMCOMERCIAL AS NOMBRE_COMERCIAL, M.PRINCIPIO,M.LABORATORIO,M.PRECIO,V.FECHA_VENTAS
+FROM MEDICAMENTOS AS M INNER JOIN VENTAS AS V
+ON M.ID_MEDICAMENTO=V.ID_MEDICAMENTO
+WHERE M.PRECIO>5
+AND M.LABORATORIO = 'EUROPHARM'
+AND MONTH(V.FECHA_VENTAS)='03';
+
+-- 4. Crea una consulta que muestre el nombre comercial, principio activo y laboratorio de los medicamentos fabricados en el laboratorio EUROPHARM y que fueron vendidos por el empleado MARIA GARCIA .
+SELECT M.NOMCOMERCIAL AS NOMBRE_COMERCIAL,M.PRINCIPIO,M.LABORATORIO,E.NOMBRE AS VENDEDOR
+FROM MEDICAMENTOS AS M INNER JOIN VENTAS AS V
+ON M.ID_MEDICAMENTO=V.ID_MEDICAMENTO
+INNER JOIN EMPLEADOS AS E
+ON  V.ID_EMPLEADO = E.ID_EMPLEADO
+WHERE M.LABORATORIO = 'EUROPHARM'
+AND E.NOMBRE='MARIA'
+AND E.APE1 = 'GARCIA';
+
+-- 5. Crea una consulta que muestre el NOMBRE Y PRIMER APELLIDO DEL CLIENTE, nombre comercial, principio activo y laboratorio de los medicamentos fabricados por el laboratorio EUROPHARM y de precio SUPERIOR a 5 €
+SELECT C.NOMBRE, C.APE1, M.NOMCOMERCIAL, M.PRINCIPIO, M.LABORATORIO
+FROM CLIENTES AS C INNER JOIN VENTAS AS V
+ON C.ID_CLIENTE=V.ID_CLIENTE
+INNER JOIN MEDICAMENTOS AS M
+ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
+WHERE M.LABORATORIO = 'EUROPHARM'
+AND M.PRECIO>5;
+
+-- 6. Crea una consulta que muestre el NOMBRE Y PRIMER APELLIDO DEL CLIENTE, nombre comercial, principio activo y laboratorio de los medicamentos fabricados por el laboratorio EUROPHARM y el nombre y primer apellido del empleado que atendió esa venta.
+SELECT C.NOMBRE,C.APE1,M.NOMCOMERCIAL,M.PRINCIPIO,M.LABORATORIO,E.NOMBRE AS NOMBRE_EMPLEADO, E.APE1 AS APELLIDO_EMPLEADO
+FROM CLIENTES AS C INNER JOIN VENTAS AS V
+ON C.ID_CLIENTE=V.ID_CLIENTE
+INNER JOIN MEDICAMENTOS AS M
+ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
+INNER JOIN EMPLEADOS AS E
+ON E.ID_EMPLEADO= V.ID_EMPLEADO
+WHERE M.LABORATORIO = 'EUROPHARM';
