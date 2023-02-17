@@ -391,3 +391,51 @@ ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
 INNER JOIN EMPLEADOS AS E
 ON E.ID_EMPLEADO= V.ID_EMPLEADO
 WHERE M.LABORATORIO = 'EUROPHARM';
+
+-- 7. Crea una consulta que muestre el nombre del medicamento y el nombre del empleado de las ventas realizadas entre 2 fechas determinadas, por ejemplo entre '2009-01-21' y '2009-03-03'.
+SELECT M.NOMCOMERCIAL AS NOMBRE,E.NOMBRE AS VENDEDOR,V.FECHA_VENTAS
+FROM MEDICAMENTOS AS M INNER JOIN VENTAS AS V
+ON M.ID_MEDICAMENTO=V.ID_MEDICAMENTO
+INNER JOIN EMPLEADOS AS E
+ON  V.ID_EMPLEADO = E.ID_EMPLEADO
+WHERE V.FECHA_VENTAS IN('2009-01-21','2009-03-03');
+
+-- 8. Crea una consulta que muestre el nombre comercial de los medicamentos que empiezan por A, que valen menos de 3€,NO fabricados por el laboratorio AZQUE y comprados por el cliente CARMEN DÍAZ.
+SELECT M.NOMCOMERCIAL AS MEDICAMENTO,M.PRECIO,M.LABORATORIO,concat(C.NOMBRE," ",C.APE1) AS CLIENTE
+FROM CLIENTES AS C INNER JOIN VENTAS AS V
+ON C.ID_CLIENTE=V.ID_CLIENTE
+INNER JOIN MEDICAMENTOS AS M
+ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
+INNER JOIN EMPLEADOS AS E
+ON E.ID_EMPLEADO= V.ID_EMPLEADO
+WHERE M.NOMCOMERCIAL LIKE 'A%'
+AND M.LABORATORIO != 'AZQUE'
+AND concat(C.NOMBRE," ",C.APE1) = "CARMEN DÍAZ";
+
+-- 9 Crear una consulta que muestre el nombre del MEDICAMENTO y el número de veces que se ha comprado cada medicamento. Ordenar la consulta por el campo Nombre MEDICAMENTO.
+SELECT M.NOMCOMERCIAL AS MEDICAMENTO, COUNT(V.ID_MEDICAMENTO) AS VECES_COMPRADO
+FROM MEDICAMENTOS AS M INNER JOIN VENTAS AS V
+ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
+GROUP BY MEDICAMENTO;
+
+-- 10 Crear una consulta que muestre el nombre del CLIENTE y el número de veces que ha comprado. Ordenar la consulta por el campo nombre del cliente.
+SELECT C.NOMBRE AS CLIENTE, COUNT(V.ID_CLIENTE) AS COMPRAS
+FROM CLIENTES AS C INNER JOIN VENTAS AS V
+ON C.ID_CLIENTE = V.ID_CLIENTE
+GROUP BY CLIENTE
+ORDER BY CLIENTE;
+
+-- 11 Crear una consulta que muestre el nombre del CLIENTE, el nombre del medicamento y el número de veces que cada cliente compró cada medicamento.Deben salir todos los clientes aunque no hayan comprado ninguna vez el medicamento. Ordenar la consulta por el campo ID_MEDICAMENTO.  
+
+-- LATENGOMAL
+SELECT C.NOMBRE AS CLIENTE,M.NOMCOMERCIAL AS MEDICAMENTO, COUNT(V.ID_MEDICAMENTO) AS COMPRAS
+FROM CLIENTES AS C LEFT JOIN VENTAS AS V
+ON C.ID_CLIENTE = V.ID_CLIENTE
+RIGHT JOIN MEDICAMENTOS AS M
+ON M.ID_MEDICAMENTO = V.ID_MEDICAMENTO
+GROUP BY CLIENTE,MEDICAMENTO
+ORDER BY MEDICAMENTO;
+
+-- 12. Crear una consulta que muestre el número de ventas realizadas por cada empleado y el nombre del empleado en el año 2010.
+
+-- 13. Crear una consulta que muestre el número de ventas realizadas por cada empleado y el nombre del empleado en el año 2010. Mostrar sólo filas en las que haya más de 1 venta.
