@@ -1,9 +1,9 @@
---------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
 -- BASE DE DATOS NUEVAEMPRESA2020
 -- 1º DAW
 -- 14-03-2023
--- MARIO IGLESIAS
---------------------------------------------------------------------------------
+-- WALTER MARTIN LOPES
+-- ------------------------------------------------------------------------------
 -- CREACIÓN DE LA BBDD NUEVAEMPRESA2020
 CREATE DATABASE NUEVAEMPRESA2020;
 USE NUEVAEMPRESA2020;
@@ -156,11 +156,11 @@ INSERT INTO PEDIDOS VALUES
 -- ---------
 -- SUBCONSULTAS
 -- ---------
--- 1
+-- 1. Listar los nombres y códigos de los departamentos en los que haya empleados
 SELECT DEP_NO, DNOMBRE FROM DEPARTAMENTOS
 WHERE DEP_NO IN (SELECT DISTINCT DEP_NO FROM EMPLEADOS);
 
--- 2
+-- 2. Obtener los datos de las facturas con la fecha de factura más reciente.
 -- CONSULTA
 SELECT * FROM PEDIDOS
 ORDER BY FECHA_PEDIDO DESC
@@ -170,7 +170,7 @@ LIMIT 1;
 SELECT * FROM PEDIDOS
 WHERE FECHA_PEDIDO = (SELECT MAX(FECHA_PEDIDO) FROM PEDIDOS);
 
--- 3
+-- 3. Mostrar para cada puesto del departamento de VENTAS la suma de los salarios de sus empleados.
 -- CONSULTA
 SELECT EMPLEADOS.OFICIO, SUM(EMPLEADOS.SALARIO) FROM EMPLEADOS INNER JOIN DEPARTAMENTOS
 ON EMPLEADOS.DEP_NO= DEPARTAMENTOS.DEP_NO
@@ -183,7 +183,7 @@ WHERE DEP_NO = (SELECT DEP_NO FROM DEPARTAMENTOS
 				WHERE DNOMBRE = 'VENTAS')
 GROUP BY EMPLEADOS.OFICIO;
 
--- 4 
+-- 4 Obtener los datos del producto con más unidades vendidas.
 SELECT * FROM PRODUCTOS
 WHERE PRODUCTO_NO = (SELECT PRODUCTO_NO FROM PEDIDOS
 					GROUP BY PRODUCTO_NO
@@ -192,16 +192,22 @@ WHERE PRODUCTO_NO = (SELECT PRODUCTO_NO FROM PEDIDOS
 										ORDER BY 1 DESC
                                         LIMIT 1));
 
--- 5
+-- 5 Mostrar los datos de los pedidos correspondientes al pedido que tenga la mayor cantidad de unidades del mismo producto. (agrupa por productos)
+SELECT
+    PEDIDO_NO,PRODUCTO_NO,CLIENTE_NO,UNIDADES,FECHA_PEDIDO
+FROM PEDIDOS P1
+WHERE UNIDADES = (
+        SELECT MAX(UNIDADES)
+        FROM PEDIDOS P2
+        WHERE P1.PRODUCTO_NO = P2.PRODUCTO_NO);
 
 
--- 6
+-- 6 Mostrar el número y nombre de cliente de los clientes atendidos por el empleado que se apellida 'CALVO'.
 SELECT CLIENTE_NO, NOMBRE FROM CLIENTES
 WHERE VENDEDOR_NO = (SELECT EMP_NO FROM EMPLEADOS
 					WHERE APELLIDO= 'CALVO');
 
--- 7
--- Mostrar los números de pedido, números de producto y fecha de los pedidos realizados por el cliente 'EDICIONES SANZ'.
+-- 7 Mostrar los números de pedido, números de producto y fecha de los pedidos realizados por el cliente 'EDICIONES SANZ'.
 SELECT PEDIDO_NO,PRODUCTO_NO,FECHA_PEDIDO
 FROM PEDIDOS
 WHERE CLIENTE_NO = (SELECT CLIENTE_NO
@@ -209,13 +215,62 @@ WHERE CLIENTE_NO = (SELECT CLIENTE_NO
                     WHERE NOMBRE='EDICIONES SANZ');
 
 -- 8. Mostrar los datos del producto más caro
-SELECT * FROM PRODUCTOS 
-WHERE 
--- 9
--- 10
--- 11
--- 12
--- 13
--- 14
+SELECT
+    PRODUCTO_NO,DESCRIPCION,PRECIO_ACTUAL,STOCK_DISPONIBLE
+FROM PRODUCTOS
+WHERE PRECIO_ACTUAL = (
+        SELECT MAX(PRECIO_ACTUAL)
+        FROM PRODUCTOS);
 
--- 15
+-- 9. Mostrar los datos de los clientes que han hecho algún pedido de 'DESTRUCTORA DE PAPEL A3'.
+SELECT C.CLIENTE_NO,C.NOMBRE,C.LOCALIDAD,C.VENDEDOR_NO,C.DEBE,C.HABER,C.LIMITE_CREDITO
+FROM CLIENTES C
+INNER JOIN PEDIDOS P 
+ON C.CLIENTE_NO = P.CLIENTE_NO
+INNER JOIN PRODUCTOS PR 
+ON P.PRODUCTO_NO = PR.PRODUCTO_NO
+WHERE PR.DESCRIPCION = 'DESTRUCTORA DE PAPEL A3';
+
+-- 10. Mostrar los datos de los empleados que han vendido a más de dos clientes.
+SELECT E.EMP_NO,E.APELLIDO,E.OFICIO,E.DIRECTOR,E.FECHA_ALTA,E.SALARIO,E.COMISION,E.DEP_NO
+FROM EMPLEADOS E
+WHERE
+    (	SELECT COUNT(DISTINCT CLIENTE_NO)
+        FROM CLIENTES
+        WHERE VENDEDOR_NO = E.EMP_NO) > 2;
+        
+-- 11. Mostrar los apellidos y oficios de los empleados del departamento 10 cuyo oficio sea el mismo que el de algún empleado del departamento de VENTAS.
+SELECT E1.APELLIDO,E1.OFICIO
+FROM EMPLEADOS E1
+WHERE E1.DEP_NO = 10
+AND E1.OFICIO IN 
+		(SELECT E2.OFICIO FROM EMPLEADOS E2
+        WHERE E2.DEP_NO = 
+				(SELECT DEP_NO
+                FROM DEPARTAMENTOS
+                WHERE DNOMBRE = 'VENTAS'));
+                
+-- 12. Mostrar el nombre del departamento en el que trabaja el empleado con mayor salario.
+SELECT D.DNOMBRE
+FROM DEPARTAMENTOS D
+WHERE D.DEP_NO = (
+        SELECT E.DEP_NO
+        FROM EMPLEADOS E
+        WHERE E.SALARIO = (
+                SELECT MAX(SALARIO)
+                FROM EMPLEADOS));
+
+-- 14. Mostrar los datos de los empleados cuyo salario sea menor a la media de los salarios de su departamento.
+SELECT E1.EMP_NO,E1.APELLIDO,E1.OFICIO,E1.DIRECTOR,E1.FECHA_ALTA,E1.SALARIO,E1.COMISION,E1.DEP_NO
+FROM EMPLEADOS E1
+WHERE E1.SALARIO < (
+        SELECT AVG(E2.SALARIO)
+        FROM EMPLEADOS E2
+        WHERE E1.DEP_NO = E2.DEP_NO);
+
+-- 15. Mostrar los nombres y las localidades de los clientes que hayan hecho pedidos.
+SELECT DISTINCT C.NOMBRE, C.LOCALIDAD
+FROM CLIENTES C
+INNER JOIN PEDIDOS P 
+ON C.CLIENTE_NO = P.CLIENTE_NO;
+
