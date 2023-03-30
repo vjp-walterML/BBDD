@@ -274,3 +274,22 @@ FROM CLIENTES C
 INNER JOIN PEDIDOS P 
 ON C.CLIENTE_NO = P.CLIENTE_NO;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
