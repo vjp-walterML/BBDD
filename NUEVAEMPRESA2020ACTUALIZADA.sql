@@ -36,3 +36,25 @@ SELECT * FROM EMPLEADOS_GARRIDO;
 -- · Número de empleados-->esta columna se llamará empleados
 -- · Suma de sus salario-->esta columna se llamará salarios
 -- · Suma de sus comisiones-->esta columna se llamará comisiones
+CREATE VIEW RESUMEN_DEP
+AS
+SELECT
+D.DNOMBRE AS DEPARTAMENTO,
+(SELECT COUNT(*) FROM EMPLEADOS AS E WHERE E.DEP_NO = D.DEP_NO) AS EMPLEADOS,
+(SELECT SUM(SALARIO) FROM EMPLEADOS AS E WHERE E.DEP_NO = D.DEP_NO) AS SALARIOS,
+(SELECT SUM(COMISION) FROM EMPLEADOS AS E WHERE E.DEP_NO = D.DEP_NO) AS COMISIONES
+FROM DEPARTAMENTOS AS D;
+
+-- 5. Crear una vista CLIENTES_2 con las columnas: cliente_no, nombre_cliente y localidad_cliente.
+CREATE VIEW CLIENTES_2
+AS
+SELECT CLIENTE_NO, NOMBRE, LOCALIDAD FROM CLIENTES;
+
+-- 6. Hacer una vista de las filas de la vista clientes_2, solo con los empleados de SEVILLA.
+CREATE VIEW CLIENTES_2_SEVILLA
+AS
+SELECT * FROM CLIENTES_2
+WHERE LOCALIDAD = 'SEVILLA';
+
+-- 7. Crear una vista empleados_sin_comision con las columnas emp_no y apellido de la tabla empleados y dnombre de la tabla departamentos, con los empleados que no tengan comisión. Posteriormente hacer un listado de todas sus filas
+
