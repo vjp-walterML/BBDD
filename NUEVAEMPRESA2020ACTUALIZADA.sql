@@ -46,6 +46,7 @@ D.DNOMBRE AS DEPARTAMENTO,
 FROM DEPARTAMENTOS AS D;
 
 SELECT * FROM RESUMEN_DEP;
+SELECT * FROM DEPARTAMENTOS;
 
 -- 5. Crear una vista CLIENTES_2 con las columnas: cliente_no, nombre_cliente y localidad_cliente.
 CREATE VIEW CLIENTES_2
@@ -63,11 +64,13 @@ WHERE LOCALIDAD = 'SEVILLA';
 SELECT * FROM CLIENTES_2_SEVILLA;
 
 -- 7. Crear una vista empleados_sin_comision con las columnas emp_no y apellido de la tabla empleados y dnombre de la tabla departamentos, con los empleados que no tengan comisión. Posteriormente hacer un listado de todas sus filas
-SELECT * FROM EMPLEADOS;
+CREATE VIEW EMPLEADOS_SIN_COMISION_BUENA AS
 SELECT E.EMP_NO, E.APELLIDO, D.DNOMBRE 
 FROM EMPLEADOS AS E INNER JOIN DEPARTAMENTOS AS D
 ON E.DEP_NO = D.DEP_NO
 WHERE E.COMISION = 0;
+
+SELECT * FROM EMPLEADOS_SIN_COMISION_BUENA;
 
 -- 8. Rebajar un 10 % el precio de todos los productos de los que no se ha vendido nada.
 UPDATE PRODUCTOS AS P
@@ -98,6 +101,7 @@ SELECT * FROM EMPLE_DEP20;
 CREATE VIEW V_CLIENTES AS
 SELECT CLIENTE_NO AS CLIENTE, NOMBRE,LOCALIDAD FROM CLIENTES 
 WHERE CLIENTE_NO IN (SELECT CLIENTE_NO FROM PEDIDOS);
+
 SELECT * FROM CLIENTES;
 SELECT * FROM PEDIDOS;
 
