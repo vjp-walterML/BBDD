@@ -43,3 +43,69 @@ END; //
 DELIMITER ;
 
 CALL VAR_EJEMPLO2;
+-- -----------------------------
+set global log_bin_trust_function_creators=1;
+
+delimiter //
+drop function if exists function1//
+create function function1()
+returns varchar(100)
+begin
+	return 'esto es un ejemplo de uso de funciones';
+end; //
+
+delimiter ;
+
+select function1() mensaje ;
+
+delimiter //
+drop function if exists function2//
+create function function2(par1 int, par2 int) 
+returns int
+begin
+return par1+par2;
+end//
+delimiter ;
+select function2(10,20) resultado;
+
+CREATE TABLE productos (
+ id INT NOT NULL AUTO_INCREMENT,
+ nombre VARCHAR(20) NOT NULL,
+ coste FLOAT NOT NULL DEFAULT 0.0,
+ precio FLOAT NOT NULL DEFAULT 0.0,
+ PRIMARY KEY(id) );
+
+INSERT INTO productos (nombre, coste, precio) 
+VALUES ('Producto A', 4, 8), ('Producto B', 1, 1.5),('Producto C', 50, 80);
+
+select * from productos;
+
+delimiter //
+drop function if exists function3//
+create function function3(coste float,precio float) 
+returns float
+begin
+	declare v_beneficio float;
+    set v_beneficio=precio - coste;
+	return v_beneficio;
+end//
+
+delimiter ;
+
+select *,function3(coste,precio) beneficio from productos;
+
+-- VIDEOTECA
+USE VIDEOTECA;
+
+DELIMITER //
+DROP FUNCTION IF EXISTS FUNCION4//
+CREATE FUNCTION FUNCION4()
+RETURNS INT 
+DETERMINISTIC
+BEGIN
+	DECLARE TOTAL INT;
+    SELECT COUNT(*) FROM ACTOR INTO TOTAL;
+    RETURN TOTAL;
+END;//
+
+SELECT FUNCION4() RESULTADO;
