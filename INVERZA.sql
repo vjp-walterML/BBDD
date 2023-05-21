@@ -11,13 +11,32 @@
 --                         | |   | . ` |   \ \/ /   |  __|   |  _  /    / /     / /\ \                        *
 --                        _| |_  | |\  |    \  /    | |____  | | \ \   / /__   / ____ \                       *
  --                      |_____| |_| \_|     \/     |______| |_|  \_\ /_____| /_/    \_\                      *
- -- ***********************************************************************************************************                                                                                                          
-																								
+ -- 																										  * 
+--                      .//////////////////////////////,													  *
+--                          .//,                         .///////.											  *
+--                          .//,                                .////*										  *
+--                          .//,    ///////////////////////,        ///,									  *
+--                          .//,    ///                  ./////.      ///,									  *
+--                          .//,    //*                        ////     .///								  *
+--                          .//,    ///                          ///     ///								  *
+--                          .//,    ///                            ///     ///								  *
+--                          .//,    ///                             ///    ,//								  *
+--                          .//,    ///                             ,//,    ///								  *
+--                          .//*    ///                             ,//,    ///								  *
+--                           ///    *//.                            //     //						  		  *
+--                           *//.    ///                           *//,    *//								  *
+--                            ///     ///,                        ///,    //,							 	  *
+--                             ///.    .///                    ///*     ///,								  *
+--                              *///      *////,            *////,     ,///							       	  *
+--                                ///       .///////////////       *///.									  *
+--                                  ,////.                        ////										  *
+--                                     ./////.              /////											  *
+--                                          ,/////////////////*												  *
+-- ************************************************************************************************************																								
 -- ENTREGA FINAL
 -- 1º DAW
 -- 2022 - 2023
 -- Walter Martín Lopes, Alberto Rivero Nuñez, Samuel Fernandez Diaz.
-
 -- ******************************************************************************************
 
 CREATE DATABASE INVERZA;
@@ -495,7 +514,6 @@ VALUES ('US0378331005', 1, '^DJI'),
        ('US38259P5089', 10, '^DJI'),
        ('US30303M1027', 13, '^DJI');
        
-       
 -- ***********************************************
 --   _____                      _ _              *
 --  / ____|                    | | |             *
@@ -506,27 +524,37 @@ VALUES ('US0378331005', 1, '^DJI'),
  -- **********************************************                                            
                                              
 -- 1.Consulta para obtener la cantidad total de préstamos personales.
-SELECT COUNT(*) FROM PERSONAL;
+SELECT COUNT(*) AS "Prestamos personales" FROM PERSONAL;
 
--- 2.Consulta para obtener la cantidad total de préstamos hipotecarios.
-SELECT COUNT(*) FROM HIPOTECA;
+-- 2.Consulta para obtener el nombre de todas las personas que han realizado al menos una transacción con un monto superior a 1000.
+SELECT DISTINCT PE.NOMBRE
+FROM PERSONAS PE
+INNER JOIN CLIENTES C ON PE.DNI = C.DNI
+INNER JOIN TRANSACCION T ON C.COD_CLIENTE = T.COD_CLIENTE
+WHERE T.CANTIDAD > 1000;
 
 -- 3.Consulta para obtener la cantidad total de préstamos personales y hipotecarios.
 SELECT
-    (SELECT COUNT(*) FROM PERSONAL) as Total_Personal,
-    (SELECT COUNT(*) FROM HIPOTECA) as Total_Hipoteca;
+    (SELECT COUNT(*) FROM PERSONAL) as "Prestamos personales",
+    (SELECT COUNT(*) FROM HIPOTECA) as "Hipotecas";
     
--- 4.Consulta para obtener la suma total de las cuantías de los préstamos personales.
-SELECT SUM(CUANTIA) FROM PRESTAMOS WHERE TIPO = 'PERSONAL';
+-- 4 Consulta para obtener el nombre y la dirección de todos los empleados que tienen más de 5 años de antigüedad en la empresa.
+SELECT PE.NOMBRE, PE.DIRECCION
+FROM PERSONAS PE
+INNER JOIN EMPLEADOS E ON PE.DNI = E.DNI
+WHERE E.ANTIGUEDAD > 5;
 
 -- 5 Consulta para obtener la suma total de las cuantías de los préstamos hipotecarios.
-SELECT SUM(CUANTIA) FROM PRESTAMOS WHERE TIPO = 'HIPOTECA';
+SELECT ROUND(SUM(CUANTIA)) AS "Suma cuantía hipotecas" FROM PRESTAMOS WHERE TIPO = 'HIPOTECA';
 
 -- 6 Consulta para obtener el promedio de las cuantías de los préstamos personales.
-SELECT AVG(CUANTIA) FROM PRESTAMOS WHERE TIPO = 'PERSONAL';
+SELECT ROUND(AVG(CUANTIA)) AS "Media cuantía prestamos personales" FROM PRESTAMOS WHERE TIPO = 'PERSONAL';
 
--- 7 Consulta para obtener el promedio de las cuantías de los préstamos hipotecarios.
-SELECT AVG(CUANTIA) FROM PRESTAMOS WHERE TIPO = 'HIPOTECA';
+-- 7 Consulta para obtener el total de préstamos hipotecarios por plazo (en años).
+SELECT PR.PLAZO_ANOS, COUNT(*) AS "Total Hipotecas"
+FROM HIPOTECA H
+INNER JOIN PRESTAMOS PR ON H.COD_PRESTAMO = PR.COD_PRESTAMO
+GROUP BY PR.PLAZO_ANOS;
 
 -- 8 Consulta para obtener el nombre y dirección de todas las sucursales junto con el nombre de la población a la que pertenecen.
 SELECT S.DIRECCION, P.POBLACION
@@ -539,47 +567,54 @@ FROM PERSONAS PE
 INNER JOIN POBLACIONES PO ON PE.CP = PO.CP;
 
 -- 10 Consulta para obtener el nombre y el teléfono de todas las personas que trabajan en cada sucursal.
-SELECT PE.NOMBRE, PE.TELEFONO, S.ID_SUCURSAL
+SELECT PE.NOMBRE AS "NOMBRE EMPLEADO", PE.TELEFONO, S.ID_SUCURSAL
 FROM PERSONAS PE
 INNER JOIN EMPLEADOS E ON PE.DNI = E.DNI
 INNER JOIN SUCURSALES S ON PE.ID_SUCURSAL = S.ID_SUCURSAL;
 
--- 11 Consulta para obtener la cantidad total de cuentas corrientes.
-SELECT COUNT(*) FROM CUENTA_CORRIENTE;
+-- 11 Consulta para obtener la cantidad total de cuentas bancarias por población.
+SELECT PO.POBLACION, COUNT(*) AS "Total Cuentas Bancarias"
+FROM CUENTAS_BANCARIAS CB
+INNER JOIN CLIENTES C ON CB.COD_CLIENTE = C.COD_CLIENTE
+INNER JOIN PERSONAS PE ON C.DNI = PE.DNI
+INNER JOIN POBLACIONES PO ON PE.CP = PO.CP
+GROUP BY PO.POBLACION;
 
 -- 12 Consulta para obtener la cantidad total de cuentas de ahorro.
-SELECT COUNT(*) FROM CUENTA_AHORRO;
+SELECT COUNT(*) AS "CUENTAS AHORRO" FROM CUENTA_AHORRO;
 
--- 13 Consulta para obtener el saldo total en cuentas corrientes.
-SELECT SUM(SALDO) FROM CUENTA_CORRIENTE;
+-- 13 Consulta para obtener la cantidad total de préstamos personales por población.
+SELECT PO.POBLACION, COUNT(*) AS "Prestamos personales"
+FROM PERSONAL P
+INNER JOIN PRESTAMOS PR ON P.COD_PRESTAMO = PR.COD_PRESTAMO
+INNER JOIN PERSONAS PE ON PR.DNI = PE.DNI
+INNER JOIN POBLACIONES PO ON PE.CP = PO.CP
+GROUP BY PO.POBLACION;
 
 -- 14 Consulta para obtener el valor total en cuentas de ahorro.
-SELECT SUM(VALOR_ACTUAL) FROM CUENTA_AHORRO;
+SELECT SUM(VALOR_ACTUAL) AS "VALOR TOTAL CUENTA AHORRO" FROM CUENTA_AHORRO;
 
 -- 15 Consulta los clientes que tienen más de una cuenta bancaria.
-SELECT C.*
-FROM CLIENTES C
-JOIN (
-    SELECT COD_CLIENTE, COUNT(*) AS NUM_CUENTAS
-    FROM CUENTAS_BANCARIAS
-    GROUP BY COD_CLIENTE
-    HAVING COUNT(*) > 1
-) CB ON C.COD_CLIENTE = CB.COD_CLIENTE;
+SELECT c.*, COUNT(pcc.IBAN) AS Numero_de_Cuentas
+FROM CLIENTES c
+JOIN PERTENECEN_CLI_CB pcc ON c.COD_CLIENTE = pcc.COD_CLIENTE AND c.DNI = pcc.DNI
+GROUP BY c.COD_CLIENTE, c.DNI
+HAVING COUNT(pcc.IBAN) > 1;
 
--- 16 Consulta las sucursales que tienen una cantidad de empleados superior a la media de empleados por sucursal.
-SELECT S.*
-FROM SUCURSALES S
-JOIN (
-    SELECT ID_SUCURSAL, COUNT(*) AS NUM_EMPLEADOS
-    FROM EMPLEADOS
-    GROUP BY ID_SUCURSAL
-) E ON S.ID_SUCURSAL = E.ID_SUCURSAL
-WHERE E.NUM_EMPLEADOS > (
-    SELECT AVG(NUM_EMPLEADOS) FROM (
-        SELECT COUNT(*) AS NUM_EMPLEADOS
-        FROM EMPLEADOS
-        GROUP BY ID_SUCURSAL
-    )
+-- 16 Consulta las sucursales que tienen una cantidad de empleados superior o igual a la media de empleados por sucursal.
+SELECT s.ID_SUCURSAL, s.DIRECCION, s.CP, s.EMAIL, COUNT(e.COD_EMPLEADO) AS Numero_de_Empleados
+FROM SUCURSALES s
+JOIN PERSONAS p ON s.ID_SUCURSAL = p.ID_SUCURSAL
+JOIN EMPLEADOS e ON p.DNI = e.DNI
+GROUP BY s.ID_SUCURSAL, s.DIRECCION, s.CP, s.EMAIL
+HAVING COUNT(e.COD_EMPLEADO) >= (
+    SELECT AVG(Numero_de_Empleados) AS Media_Empleados
+    FROM (
+        SELECT p.ID_SUCURSAL, COUNT(e.COD_EMPLEADO) AS Numero_de_Empleados
+        FROM EMPLEADOS e
+        JOIN PERSONAS p ON e.DNI = p.DNI
+        GROUP BY p.ID_SUCURSAL
+    ) AS EmpleadosPorSucursal
 );
 
 -- 17 Consulta los préstamos con una cuantía superior al promedio de cuantía de todos los préstamos.
@@ -590,22 +625,24 @@ WHERE P.CUANTIA > (
     FROM PRESTAMOS
 );
 
--- 18 Consulta las cuentas de ahorro con un saldo superior a 5000.
-SELECT CA.*
-FROM CUENTA_AHORRO CA
-WHERE CA.SALDO > 5000;
+-- 18 Consulta las cuentas de ahorro con un valor actual superior a 5000.
+SELECT *
+FROM CUENTA_AHORRO 
+WHERE VAlOR_ACTUAL > 5000;
 
 -- 19 Consulta las cuentas bancarias que no tienen ninguna transacción registrada.
 SELECT CB.*
 FROM CUENTAS_BANCARIAS CB
-LEFT JOIN TRANSACCION T ON CB.COD_CUENTA = T.COD_CUENTA
+LEFT JOIN TRANSACCION T ON CB.IBAN = T.IBAN
 WHERE T.COD_TRANSACCION IS NULL;
 
 -- 20 Consulta la cantidad total de empleados por sucursal.
-SELECT S.ID_SUCURSAL, S.DIRECCION, COUNT(*) AS NUM_EMPLEADOS
+SELECT S.ID_SUCURSAL, S.DIRECCION, COUNT(P.DNI) AS NUM_EMPLEADOS
 FROM SUCURSALES S
-INNER JOIN EMPLEADOS E ON S.ID_SUCURSAL = E.ID_SUCURSAL
-GROUP BY S.ID_SUCURSAL, S.DIRECCION;
+LEFT JOIN PERSONAS P ON S.ID_SUCURSAL = P.ID_SUCURSAL
+WHERE P.DNI IN (SELECT DNI FROM EMPLEADOS)
+GROUP BY S.ID_SUCURSAL, S.DIRECCION
+ORDER BY S.ID_SUCURSAL;
 
 -- 21 Consulta la cantidad total de préstamos de cada tipo en la tabla de préstamos.
 SELECT TIPO, COUNT(*) AS NUM_PRESTAMOS
@@ -619,7 +656,7 @@ LEFT JOIN TELEFONOS T ON S.ID_SUCURSAL = T.ID_SUCURSAL
 WHERE T.TELEFONO IS NULL;
 
 -- 23 Consulta el promedio de cuantía de los préstamos personales según su motivo.
-SELECT P.MOTIVO, AVG(PR.CUANTIA) AS PROMEDIO_CUANTIA
+SELECT P.MOTIVO, ROUND(AVG(PR.CUANTIA)) AS PROMEDIO_CUANTIA
 FROM PERSONAL P
 INNER JOIN PRESTAMOS PR ON P.COD_PRESTAMO = PR.COD_PRESTAMO
 GROUP BY P.MOTIVO;
@@ -672,7 +709,7 @@ GROUP BY C.COD_CLIENTE, C.DNI;
 -- | |   | | | (_) | (_|  __/ (_| | | | | | | | |  __/ | | | || (_) \__ \ *
 -- |_|   |_|  \___/ \___\___|\__,_|_|_| |_| |_|_|\___|_| |_|\__\___/|___/ *
 -- ************************************************************************                                                                       
-                                                                       
+                           
 -- PROCEDIMIENTO 1- El siguiente procedimiento almacenado buscará una cuenta corriente por IBAN y realizará un depósito en la cuenta. Si el IBAN no se encuentra, el procedimiento almacenado mostrará un mensaje de error. Si el monto del depósito es negativo, también mostrará un mensaje de error. De lo contrario, actualizará la cuenta bancaria con el nuevo saldo y registrará la transacción.
 DELIMITER //
 DROP PROCEDURE IF EXISTS INGRESAR_DINERO;
@@ -812,7 +849,6 @@ SELECT * FROM NORMAL;
 SELECT * FROM ORO;
 SELECT * FROM PLATINUM;
 
-
 -- *************************************************
 --  ______                _                        *
 -- |  ____|              (_)                       *
@@ -820,8 +856,8 @@ SELECT * FROM PLATINUM;
 -- |  __| | | | '_ \ / __| |/ _ \| '_ \ / _ \/ __| *
 -- | |  | |_| | | | | (__| | (_) | | | |  __/\__ \ *
 -- |_|   \__,_|_| |_|\___|_|\___/|_| |_|\___||___/ *
--- *************************************************                                                
-                                                
+-- *************************************************                                                					
+                          
 -- FUNCION 1- Esta función recibe el código del cliente y retorna el saldo total de todas sus cuentas corrientes.
 DELIMITER //
 DROP FUNCTION IF EXISTS SALDO_TOTAL_CLIENTE;
@@ -861,16 +897,27 @@ DELIMITER ;
 SELECT CONTAR_TRANSACCIONES('12345678A','2023-01-11','2023-02-10') AS TRANSACCIONES;
 
 
--- *****************************************************
---  _______ _                _                         *
--- |__   __(_)              | |                        *
---    | |   _  __ _ _ __ ___| |_ ___  _ __   ___  ___  *
---    | |  | |/ _` | '__/ _ \ __/ _ \| '_ \ / _ \/ __| *
---    | |  | | (_| | | |  __/ || (_) | | | |  __/\__ \ *
---    |_|  |_|\__, |_|  \___|\__\___/|_| |_|\___||___/ *
---             __/ |                                   *
---            |___/                                    *
--- *****************************************************
+-- ******************************************************
+--  _______ _                _                          *
+-- |__   __(_)              | |                         *
+--    | |   _  __ _ _ __ ___| |_ ___  _ __   ___  ___   *
+--    | |  | |/ _` | '__/ _ \ __/ _ \| '_ \ / _ \/ __|  *
+--    | |  | | (_| | | |  __/ || (_) | | | |  __/\__ \  *
+--    |_|  |_|\__, |_|  \___|\__\___/|_| |_|\___||___/  *
+--             __/ |                                    *
+--            |___/                                     *
+-- 													    *
+--                         __,,,,_					    *
+--          _ __..-;''`--/'/ /.',-`-.					*
+--      (`/' ` |  \ \ \\ / / / / .-'/`,_				*
+--     /'`\ \   |  \ | \| // // / -.,/_,'-,				*
+--    /<7' ;  \ \  | ; ||/ /| | \/    |`-/,/-.,_,/')	*
+--   /  _.-, `,-\,__|  _-| / \ \/|_/  |    '-/.;.\'		*
+--   `-`  f/ ;      / __/ \__ `/ |__/ |					*
+--        `-'      |  -| =|\_  \  |-' |					*
+--              __/   /_..-' `  ),'  //					*
+--          fL ((__.-'((___..-'' \__.'					*
+-- ******************************************************
 
 -- TIGRETÓN 1 - Este tigretón actualizará la rentabilidad YTD cada vez que se actualice el precio actual de las acciones.
 DELIMITER //
@@ -927,14 +974,27 @@ CALL INGRESAR_DINERO('ES0012345678001234567890',100);
 SELECT * FROM TRANSACCION;
 
 
-
--- *********************************************************************************************************************
---   ____                     _____    _                    ____            ____                       _   _           *
---  / __ \                   |  __ \  (_)                  / __ \          |  _ \                     | | (_)          *
--- | |  | |  _   _    ___    | |  | |  _    ___    ___    | |  | |  ___    | |_) |   ___   _ __     __| |  _    __ _   *
--- | |  | | | | | |  / _ \   | |  | | | |  / _ \  / __|   | |  | | / __|   |  _ <   / _ \ | '_ \   / _` | | |  / _` |  *
--- | |__| | | |_| | |  __/   | |__| | | | | (_) | \__ \   | |__| | \__ \   | |_) | |  __/ | | | | | (_| | | | | (_| |  *
---  \___\_\  \__,_|  \___|   |_____/  |_|  \___/  |___/    \____/  |___/   |____/   \___| |_| |_|  \__,_| |_|  \__,_|  * 
--- 																													   *
--- *********************************************************************************************************************                                                                                                                   
-                                                                                                                   
+-- *****************************************************************
+--  ____    _    _   ______     _____    _____    ____     _____   *
+-- / __ \  | |  | | |  ____|   |  __ \  |_   _|  / __ \   / ____|  *
+-- | |  | | | |  | | | |__      | |  | |   | |   | |  | | | (___   *
+-- | |  | | | |  | | |  __|     | |  | |   | |   | |  | |  \___ \  * 
+-- | |__| | | |__| | | |____    | |__| |  _| |_  | |__| |  ____) | *
+--  \___\_\  \____/  |______|   |_____/  |_____|  \____/  |_____/  *
+--                                                                 *
+--                                                                 *
+--                          ____     _____                         *
+--                         / __ \   / ____|                        *
+--                        | |  | | | (___                          *
+--                        | |  | |  \___ \                         *
+--                        | |__| |  ____) |                        *
+--                         \____/  |_____/                         *
+--                                                                 *
+--                                                                 *
+--    ____    ______   _   _   _____    _____    _____             *
+--   |  _ \  |  ____| | \ | | |  __ \  |_   _|  / ____|     /\     *
+--   | |_) | | |__    |  \| | | |  | |   | |   | |  __     /  \    *
+--   |  _ <  |  __|   | . ` | | |  | |   | |   | | |_ |   / /\ \   *
+--   | |_) | | |____  | |\  | | |__| |  _| |_  | |__| |  / ____ \  *
+--   |____/  |______| |_| \_| |_____/  |_____|  \_____| /_/    \_\ *     
+-- *****************************************************************                                                                                                                            

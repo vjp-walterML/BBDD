@@ -208,11 +208,82 @@ SELECT FUNCION2(1,'Mecanica') AS MENSAJE;
 -- ******************************TIGRETONES******************************
 -- **********************************************************************
 -- 1. Crea un trigger para controlar la inserción de nuevos préstamos. El trigger se dispara cuando se inserta un nuevo préstamo (la fecha de devolución está a null) y añade UNA UNIDAD AL CAMPO TOTALPRES DEL SOCIO AL QUE SE PRESTA EL LIBRO.
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE1;
+//CREATE TRIGGER TIGRE1
+AFTER INSERT ON PRESTAMOS
+FOR EACH ROW
+BEGIN
+	IF NEW.FECHADEV IS NULL THEN
+		UPDATE SOCIOS SET TOTALPRES = TOTALPRES + 1 
+		WHERE CODSOCIO = NEW.CODSOCIO;
+    END IF;
+END; //
+DELIMITER ;
+
+INSERT INTO PRESTAMOS (codlib, codsocio,fechapres) VALUES
+(10,1,'2023/5/21');
+
+SELECT * FROM LIBROS;
+SELECT * FROM PRESTAMOS;
+SELECT * FROM SOCIOS;
 
 -- 2. Crea un trigger para controlar la modificación del atributo “fechadev” de préstamos, es decir, cuando se devuelve o se modifica a prestado un libro)
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE2;
+// CREATE TRIGGER TIGRE2
+AFTER UPDATE ON PRESTAMOS
+FOR EACH ROW
+BEGIN
+	IF NEW.FECHADEV IS NULL AND OLD.FECHADEV IS NOT NULL THEN
+		UPDATE SOCIOS SET TOTALPRES = TOTALPRES + 1 
+		WHERE CODSOCIO = NEW.CODSOCIO;
+	ELSE	
+		IF NEW.FECHADEV IS NOT NULL AND OLD.FECHADEV IS NULL THEN
+			UPDATE SOCIOS SET TOTALPRES = TOTALPRES - 1 
+			WHERE CODSOCIO = NEW.CODSOCIO;
+		END IF;
+	END IF;
+END; //
+DELIMITER ;
 
 -- 3. Crea un trigger para controlar la modificación del atributo CODSOCIO en la tabla PRÉSTAMOS CUANDO SE LE ASIGNA UN PRÉSTAMO A OTRO SOCIO.
-
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE3;
+// CREATE TRIGGER TIGRE3
+AFTER UPDATE ON PRESTAMOS
+FOR EACH ROW
+BEGIN
+	IF NEW.FECHADEV IS NULL THEN
+		UPDATE SOCIOS SET TOTALPRES = TOTALPRES + 1 WHERE CODSOCIO = NEW.CODSOCIO;
+		UPDATE SOCIOS SET TOTALPRES = TOTALPRES - 1 WHERE CODSOCIO = OLD.CODSOCIO;
+	END IF;
+END; //
+DELIMITER ;
 -- 4. Crear un disparador para controlar que el número de préstamos sea siempre 0 cuando se inserta un nuevo socio. NOTA: usar signal sqlstate '45000' set message_text = 'Mensaje error' . (El estado 45000 es un estado genérico que representa una "excepción definida por el usuario no controlada).
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE4;
+// CREATE TRIGGER TIGRE4
+AFTER INSERT ON SOCIOS
+FOR EACH ROW
+BEGIN
+	IF NEW.TOTALPRES != 0 THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'CUANDO SE INSERTA UN SOCIO, SU NÚMERO DE PRÉSTAMOS TIENE QUE SER 0.';
+	END IF;
+END; //
+DELIMITER ;
 
+INSERT INTO SOCIOS VALUES(30,'MARA GARCIA','C SOL','PLASENCIA','10600','927000011',5);
 -- 5. Crear un trigger que controle el borrado de préstamos, restando una unidad cuando al campo totalpres de la tabla SOCIOS cuando el libro haya sido devuelto(sólo se puede hacer si el libro se ha devuelto). El trigger se declarará AFTER DELETE ON PRESTAMOS
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE5;
+// CREATE TRIGGER TIGRE5
+AFTER DELETE ON PRESTAMOS
+FOR EACH ROW
+BEGIN
+	IF OLD.FECHADEV IS NULL THEN
+		UPDATE SOCIOS SET TOTLAPRES = TOTALPRES -1
+        WHERE CODSOCIO = OLD.CODSOCIO;
+	END IF;
+END; //
+DELIMITER ;
