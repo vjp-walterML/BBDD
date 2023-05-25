@@ -122,8 +122,10 @@ CALL PROCEDIMIENTO3('R');
 -- salario neto= salario- salario*18/100)+comision-(comision*2/100)
 -- Ejecuta la función para el trabajador “GUTIERREZ”
 DELIMITER //
-CREATE FUNCTION SueldoNeto(apellido_empleado VARCHAR(30))
+DROP FUNCTION IF EXISTS SueldoNeto;
+//CREATE FUNCTION SueldoNeto(apellido_empleado VARCHAR(30))
 RETURNS DECIMAL(10,2)
+DETERMINISTIC
 BEGIN
   DECLARE salario_bruto DECIMAL(10,2);
   DECLARE comision_bruto DECIMAL(10,2);
@@ -137,7 +139,7 @@ BEGIN
   SET salario_neto = (salario_bruto - (salario_bruto * 18 / 100)) + (comision_bruto - (comision_bruto * 2 / 100));
 
   RETURN salario_neto;
-END //
+END; //
 DELIMITER ;
 
 SELECT SueldoNeto('GUTIERREZ') AS Salario_Neto;

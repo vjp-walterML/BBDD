@@ -268,8 +268,41 @@ SELECT MAX(PRECIO) AS 'SERVICIO MAS CARO', MIN(PRECIO) AS 'SERVICIO MAS BARATO' 
 -- *************************************FUNCIONES*************************************
 -- ***********************************************************************************
 -- 19. Crea una función que tome como parámetros una fecha y un número de habitación y devuelva el número de veces que está reservada.
+DELIMITER //
+DROP FUNCTION IF EXISTS FUNCION1;
+// CREATE FUNCTION FUNCION1 (P_FECHA DATE, P_NUM_HABITACION INT) RETURNS INT
+DETERMINISTIC
+BEGIN
+	-- DECLARO VARIABLES
+	DECLARE RESULTADO INT;
+	-- CODIGO FUNCION
+    SELECT COUNT(*) INTO RESULTADO FROM RESERVA_HABITAC 
+    WHERE NUM_HABITACION = P_NUM_HABITACION
+    AND FECHA_ENTRADA <= P_FECHA
+    AND FECHA_SALIDA >= P_FECHA;
+
+	RETURN RESULTADO;
+END;//
+DELIMITER ;
+SELECT * FROM RESERVA_HABITAC;
+SELECT FUNCION1('2009-03-16',102) AS RESULTADO;
 
 -- 20. Crea una función que devuelva si una habitación está reservada en una fecha que se especifique.
+DELIMITER //
+DROP FUNCTION IF EXISTS FUNCION2;
+// CREATE FUNCTION FUNCION2 (P_FECHA DATE, P_NUM_HABITACION INT) RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+	-- CODIGO FUNCION
+   IF FUNCION1(P_FECHA, P_NUM_HABITACION) > 0 THEN
+		RETURN 'LA HABITACIÓN ESTÁ RESERVADA';
+	ELSE
+		RETURN 'LA HABITACIÓN NO ESTÁ RESERVADA';
+   END IF;
+END;//
+DELIMITER ;
+
+SELECT FUNCION2('2023-03-16',102) AS RESULTADO;
 
 -- ***********************************************************************************
 -- ***************************************VISTAS**************************************
@@ -292,10 +325,16 @@ SELECT * FROM VISTA2;
 -- ****************************OTRAS RESTRICCIONES (CHECK)****************************
 -- ***********************************************************************************
 -- 23. Controlar en la tabla temporada que la fecha de fin es mayor que la fecha de inicio.
+ALTER TABLE TEMPORADA
+ADD CONSTRAINT FECHA_CK CHECK(FECHA_FIN > FECHA_INICIO);
 
 -- 24. Controlar en la tabla reserva_habitac que la fecha de salida es mayor o igual que fecha de entrada.
+ALTER TABLE RESERVA_HABITAC
+ADD CONSTRAINT FECHA_RESERVA_CK CHECK(FECHA_SALIDA > FECHA_ENTRADA);
 
 -- 25. Controlar en la tabla servicios que el iva está comprendido entre 0 y 100,0.
+ALTER TABLE SERVICIOS
+ADD CONSTRAINT IVA_CK CHECK(IVA BETWEEN 0 AND 100);
 
 -- ***********************************************************************************
 -- ************************************CREATE INDEX***********************************
@@ -310,17 +349,137 @@ CREATE INDEX INDICE2 ON SERVICIOS (NOMBRE_SERVICIO);
 -- ***********************************PROCEDIMIENTOS**********************************
 -- ***********************************************************************************
 -- 1. Crear un procedimiento para realizar la inserción de un nuevo país. Controlar MEDIANTE CONTROL DE ERRORES que no se inserten valores duplicados para países.
+-- 1062
+DELIMITER //
+DROP PROCEDURE IF EXISTS PROCEDIMIENTO1;
+// CREATE PROCEDURE PROCEDIMIENTO1(P_NOMBRE VARCHAR(30))
+BEGIN 
+	-- HANDLER
+	DECLARE EXIT HANDLER FOR 1062 
+    BEGIN
+		SELECT 'NO PUEDE INESERTAR VALORES DUPLICADOS' AS ERROR;
+    END;
+    
+    INSERT INTO PAISES VALUES(P_NOMBRE);
+END;//
+DELIMITER ; 
+
+CALL PROCEDIMIENTO1('ESPAÑA');
+
+CALL PROCEDIMIENTO1('EEUU');
 
 -- 2. Crear un procedimiento con un cursor que aplique un descuento del 10% al precio de las habitaciones que tienen Terraza, un 5% a las que tienen salón y un aumento de precio de 10 € a las habitaciones exteriores.
+DELIMITER //
+DROP PROCEDURE IF EXISTS PROCEDIMIENTO2;
+// CREATE PROCEDURE PROCEDIMIENTO2()
+BEGIN
+	-- DECLARO VARIABLES
+    DECLARE FIN_TABLA BOOLEAN DEFAULT FALSE;
+    DECLARE V_CATEGORIA INT;
+    DECLARE V_EXTERIOR CHAR(2);
+	DECLARE V_SALON CHAR(2);
+	DECLARE V_TERRAZA CHAR(2);
+    
+    -- DECLARO CURSOR
+	DECLARE C CURSOR FOR SELECT CATEGORIA,EXTERIOR,SALON,TERRAZA FROM TIPO_HABITACION;
+    -- DECLARO HANLER
+    DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET FIN_TABLA = TRUE;
+    -- ABRO CURSOR
+    OPEN C;
+    -- RECORRO CURSOR
+    WHILE (FIN_TABLA != TRUE) DO
+		FETCH C INTO V_CATEGORIA,V_EXTERIOR,V_SALON,V_TERRAZA;
+        IF (FIN_TABLA != TRUE) THEN
+			-- EXTERIOR
+			IF V_EXTERIOR = 'SI' THEN
+				UPDATE PRECIO_HABITACION
+                SET PRECIO = PRECIO + 10
+                WHERE TIPO_HABITACION = V_CATEGORIA;
+            END IF;
+            -- SALON
+            IF V_SALON = 'SI' THEN
+				UPDATE PRECIO_HABITACION
+                SET PRECIO = PRECIO * 0.95
+                WHERE TIPO_HABITACION = V_CATEGORIA;
+            END IF;
+            -- TERRAZA
+            IF V_TERRAZA = 'SI' THEN
+				UPDATE PRECIO_HABITACION
+                SET PRECIO = PRECIO * 0.90
+                WHERE TIPO_HABITACION = V_CATEGORIA;
+            END IF;
+        END IF;
+    END WHILE;
+    -- CIERRO CURSOR
+    CLOSE C;
+END; //
+DELIMITER ;
+
+CALL PROCEDIMIENTO2();
+
+SELECT * FROM PRECIO_HABITACION;
 
 -- 3. Crear un procedimiento para listar todas las habitaciones, mostrando su tipo, nº de camas, y precio para la temporada 3.
+DELIMITER //
+DROP PROCEDURE IF EXISTS PROCEDIMIENTO3;
+//CREATE PROCEDURE PROCEDIMIENTO3()
+BEGIN
+	SELECT H.*,T.CAMAS,P.PRECIO,P.TEMPORADA FROM HABITACIONES AS H 
+    INNER JOIN TIPO_HABITACION AS T ON H.TIPO_HABITACION = T.CATEGORIA
+    INNER JOIN PRECIO_HABITACION AS P ON T.CATEGORIA = P.TIPO_HABITACION
+    WHERE P.TEMPORADA = 3;
+END;//
+DELIMITER ;
 
+CALL PROCEDIMIENTO3();
 -- ***********************************************************************************
 -- ************************************DISPARADORES***********************************
 -- ***********************************************************************************
 -- 1. Crear un trigger que sirva para controlar que cuando se inserta un gasto, la fecha del mismo está dentro de las fechas de la reserva al que se asigna. Ejemplo de ejecución del trigger:
 -- El gasto que se quiere insertar corresponde a la reserva con IDRESERVA=1,
 -- por lo tanto el trigger se dispara y evita anotar este gasto al estar fuera de fecha. Devolver el error asociado.
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE1;
+// CREATE TRIGGER TIGRE1
+AFTER INSERT ON GASTOS
+FOR EACH ROW
+BEGIN
+	-- DECLARO VARIABLES
+    DECLARE V_FECHA_GASTO DATE;
+    DECLARE V_FECHA_ENTRADA DATE;
+    DECLARE V_FECHA_SALIDA DATE;
+    SET V_FECHA_GASTO = NEW.FECHA;
+    SELECT FECHA_ENTRADA INTO V_FECHA_ENTRADA FROM RESERVA_HABITAC
+    WHERE ID_RESERVA = NEW.ID_RESERVA;
+    SELECT FECHA_SALIDA INTO V_FECHA_SALIDA FROM RESERVA_HABITAC
+    WHERE ID_RESERVA = NEW.ID_RESERVA;
+    
+    IF (V_FECHA_GASTO NOT BETWEEN V_FECHA_ENTRADA AND V_FECHA_SALIDA) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'EL GASTO NO SE PUEDE ANOTAR A ESTA RESERVA, FUERA DE FECHAS';
+    END IF;
+    
+END; //
+
+INSERT INTO GASTOS (ID_RESERVA,ID_SERVICIO,FECHA,CANTIDAD,PRECIO) VALUES
+(1,1,'2009-03-26',1,10);
 
 -- 2. Crear un trigger que controle los cambios de precio de las habitaciones. Se dispara cuando se hace una modificación en la tabla PRECIO_HABITACION, SÓLO EN EL CAMPO PRECIO. Cuando esto ocurre, automáticamente se guardan en una tabla auxiliar los siguientes campos: tipo_habitacion, temporada, precio anterior y precio actual.
+-- CREO TABLA AUXILIAR
+	DROP TABLE IF EXISTS TABLA_AUXILIAR;
+    CREATE TABLE TABLA_AUXILIAR(TIPO_HABITACION INT,TEMPORADA INT,PRECIO_ANTERIOR DECIMAL(5,2),PRECIO_ACTUAL DECIMAL(5,2));
+    
+DELIMITER //
+DROP TRIGGER IF EXISTS TIGRE2;
+// CREATE TRIGGER TIGRE2
+AFTER UPDATE ON PRECIO_HABITACION
+FOR EACH ROW
+BEGIN
+	IF (OLD.PRECIO != NEW.PRECIO) THEN
+    INSERT INTO TABLA_AUXILIAR VALUES (NEW.TIPO_HABITACION,NEW.TEMPORADA,OLD.PRECIO,NEW.PRECIO);
+    END IF;
+END; //
 
+SELECT * FROM TABLA_AUXILIAR;
+-- CAMBIO LOS PRECIOS
+CALL PROCEDIMIENTO2();
+SELECT * FROM TABLA_AUXILIAR;
