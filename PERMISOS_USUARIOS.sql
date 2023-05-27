@@ -113,7 +113,7 @@ ALTER USER 'tribunal'@'localhost' IDENTIFIED BY '4321';
 -- 8. Modifica el usuario “opositor_priv” para revocar los permisos que tenía de modificación en la tabla OPOSITORES.
 REVOKE INSERT, UPDATE, DELETE ON oposiciones.opositores FROM 'opositor_priv';
 -- 9. Eliminar todos los privilegios al usuario opositor@localhost
-REVOKE ALL PRIVILEGES ON oposiciones.opositores FROM 'opositor'@'localhost';
+-- REVOKE ALL PRIVILEGES ON oposiciones.opositores FROM 'opositor'@'localhost';
 -- 10. Muestra los privilegios de usuario opositor@localhost después de la última modificación.
 SHOW GRANTS FOR 'opositor'@'localhost';
 
